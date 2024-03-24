@@ -8,6 +8,10 @@ const budgetSchema = new mongoose.Schema({
   budget: {
     type: Number,
     required: true
+  },
+  userId: {
+    type: String,
+    required: true
   }
 });
 
