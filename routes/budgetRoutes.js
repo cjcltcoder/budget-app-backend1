@@ -56,16 +56,18 @@ router.put('/:id', requireAuth, async (req, res) => {
 router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const userId = req.userData.userId; // Extract user ID from authentication token
+    const budgetItemId = req.params.id; // Extract budget item ID from request parameters
 
-    // Delete user
-    await User.findByIdAndDelete(userId);
+    // Find the budget item by its _id and userId
+    const deletedBudgetItem = await Budget.findOneAndDelete({ _id: budgetItemId, userId });
 
-    // Delete associated budget items
-    await Budget.deleteMany({ userId });
+    if (!deletedBudgetItem) {
+      return res.status(404).json({ message: 'Budget item not found' });
+    }
 
-    res.status(200).json({ message: 'User and associated budget items deleted successfully' });
+    res.status(200).json({ message: 'Budget item deleted successfully' });
   } catch (error) {
-    console.error('Error deleting user and associated budget items:', error);
+    console.error('Error deleting budget item:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
