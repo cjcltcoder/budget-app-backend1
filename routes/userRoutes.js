@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const { requireAuth } = require('../middleware/authMiddleware'); // Import the requireAuth middleware
 const jwt = require('jsonwebtoken');
+const Budget = require('../models/Budget'); // Import the Budget model
 
 // Create a new user
 router.post('/', async (req, res) => {
@@ -77,14 +78,26 @@ router.patch('/profile', requireAuth, async (req, res) => {
 // Delete user
 router.delete('/profile', requireAuth, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.userData.userId);
-    if (!user) {
+    const userId = req.userData.userId;
+
+    // Delete user
+    const deletedUser = await User.findByIdAndDelete(userId);
+    if (!deletedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json({ message: 'User deleted successfully' });
+
+    // Delete associated budget items
+    const result = await Budget.deleteMany({ userId });
+
+    // Check if any budget items were deleted
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'No budget items found for the user' });
+    }
+
+    res.status(200).json({ message: 'User and associated budget items deleted successfully' });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error deleting user and associated budget items:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
