@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,8 +20,8 @@ app.use(
 );
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://test1:test1@final-project.mzntjfb.mongodb.net/test?retryWrites=true&w=majority', {
-  dbName: 'final-project'
+mongoose.connect(process.env.MONGODB_URI, {
+  dbName: process.env.DB_NAME
 })
 .then(() => {
   console.log('MongoDB connected successfully');
