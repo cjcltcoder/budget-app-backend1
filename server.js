@@ -12,7 +12,11 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://final-project.onrender.com'],
+  })
+);
 
 // MongoDB Connection
 mongoose.connect('mongodb+srv://test1:test1@final-project.mzntjfb.mongodb.net/test?retryWrites=true&w=majority', {
