@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose'); // Add this line to import mongoose
+const mongoose = require('mongoose');
 const Budget = require('../models/Budget');
 const { requireAuth } = require('../middleware/authMiddleware');
 
@@ -12,7 +12,7 @@ const isValidObjectId = (id) => {
 // Get all budget categories
 router.get('/categories', requireAuth, async (req, res) => {
   try {
-    const categories = await Budget.find({ userId: req.userData.userId }, 'category budget');
+    const categories = await Budget.find({ userId: req.userData.userId }).select('category budget tags').exec();
     res.status(200).json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -22,8 +22,8 @@ router.get('/categories', requireAuth, async (req, res) => {
 // Create a new budget item
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { category, budget, userId } = req.body; // Extract user ID from request body
-    const newBudget = new Budget({ category, budget, userId }); // Include user ID when creating new budget item
+    const { category, budget, userId, tag } = req.body;
+    const newBudget = new Budget({ category, budget, userId, tag });
     await newBudget.save();
     res.status(201).json(newBudget);
   } catch (error) {
@@ -35,15 +35,30 @@ router.post('/', requireAuth, async (req, res) => {
 // Update a budget item
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const { category, budget, userId } = req.body; // Extract user ID from request body
+    const { category, budget, userId, newTag, tagToDelete } = req.body; // Destructure newTag and tagToDelete from req.body
+
+    let updateQuery = { category, budget }; // Initialize the update query with category and budget
+
+    // If newTag is provided, add it to the tags array
+    if (newTag) {
+      updateQuery.$addToSet = { tags: newTag }; // Use $addToSet to add the newTag to tags array
+    }
+
+    // If tagToDelete is provided, remove it from the tags array
+    if (tagToDelete) {
+      updateQuery.$pull = { tags: tagToDelete }; // Use $pull to remove the tagToDelete from tags array
+    }
+
     const updatedBudget = await Budget.findOneAndUpdate(
-      { _id: req.params.id, userId: userId }, // Find budget item by ID and user ID
-      { category, budget },
+      { _id: req.params.id, userId },
+      updateQuery, // Use the updateQuery object
       { new: true }
     );
+
     if (!updatedBudget) {
       return res.status(404).json({ message: 'Budget item not found' });
     }
+
     res.status(200).json(updatedBudget);
   } catch (error) {
     console.error('Error updating budget item:', error);
@@ -51,14 +66,35 @@ router.put('/:id', requireAuth, async (req, res) => {
   }
 });
 
+// router.delete('/:id/tags/:tagToDelete', requireAuth, async (req, res) => {
+//   try {
+//     const { id, tagToDelete } = req.params;
+//     const userId = req.user.id; // Assuming userId is available from authentication middleware
+
+//     const updatedBudget = await Budget.findOneAndUpdate(
+//       { _id: id, userId },
+//       { $pull: { tags: tagToDelete } }, // Remove the specified tag from the tags array
+//       { new: true }
+//     );
+
+//     if (!updatedBudget) {
+//       return res.status(404).json({ message: 'Budget item not found or tag not present' });
+//     }
+
+//     res.status(200).json(updatedBudget);
+//   } catch (error) {
+//     console.error('Error deleting tag:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+
 
 // Delete a budget item
 router.delete('/:id', requireAuth, async (req, res) => {
   try {
-    const userId = req.userData.userId; // Extract user ID from authentication token
-    const budgetItemId = req.params.id; // Extract budget item ID from request parameters
+    const userId = req.userData.userId;
+    const budgetItemId = req.params.id;
 
-    // Find the budget item by its _id and userId
     const deletedBudgetItem = await Budget.findOneAndDelete({ _id: budgetItemId, userId });
 
     if (!deletedBudgetItem) {

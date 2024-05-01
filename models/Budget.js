@@ -12,7 +12,8 @@ const budgetSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true
-  }
+  },
+  tags: [String] // Array to store tags
 });
 
 const Budget = mongoose.model('Budget', budgetSchema);
