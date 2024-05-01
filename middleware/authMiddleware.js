@@ -12,7 +12,7 @@ const requireAuth = (req, res, next) => {
     const decodedToken = jwt.verify(token, 'unbreakable key');
     // Attach user data to the request object
     req.userData = { email: decodedToken.email, userId: decodedToken.userId };
-    next(); // Proceed to the next middleware or route handler
+    next();
   } catch (error) {
     return res.status(401).json({ message: 'Authentication failed', error: error.message });
   }

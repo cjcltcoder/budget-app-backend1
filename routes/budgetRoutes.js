@@ -35,13 +35,13 @@ router.post('/', requireAuth, async (req, res) => {
 // Update a budget item
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const { category, budget, userId, newTag, tagToDelete } = req.body; // Destructure newTag and tagToDelete from req.body
+    const { category, budget, userId, newTag, tagToDelete } = req.body; 
 
-    let updateQuery = { category, budget }; // Initialize the update query with category and budget
+    let updateQuery = { category, budget }; 
 
     // If newTag is provided, add it to the tags array
     if (newTag) {
-      updateQuery.$addToSet = { tags: newTag }; // Use $addToSet to add the newTag to tags array
+      updateQuery.$addToSet = { tags: newTag }; 
     }
 
     // If tagToDelete is provided, remove it from the tags array

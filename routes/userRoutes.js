@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { requireAuth } = require('../middleware/authMiddleware'); // Import the requireAuth middleware
+const { requireAuth } = require('../middleware/authMiddleware'); 
 const jwt = require('jsonwebtoken');
-const Budget = require('../models/Budget'); // Import the Budget model
+const Budget = require('../models/Budget'); 
 
 // Create a new user
 router.post('/', async (req, res) => {
@@ -66,7 +66,7 @@ router.patch('/profile', requireAuth, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     if (email) user.email = email;
-    if (password) user.password = password; // You might want to hash the password before saving
+    if (password) user.password = password; 
     await user.save();
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {

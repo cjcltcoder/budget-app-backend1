@@ -25,13 +25,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .catch((error) => {
   console.error('Error connecting to MongoDB:', error);
-  // You might want to implement retry logic here or handle the error differently
+  
 });
 
 // Routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
-app.use('/budgets', budgetRoutes); // Use budgetRoutes
+app.use('/budgets', budgetRoutes); 
 app.use('/income', incomeRoutes);
 
 module.exports = app;
